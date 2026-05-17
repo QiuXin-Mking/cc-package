@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================================
+# qq-session — 命名会话，链式多轮对话
+#
+# 用法:
+#   ./qq-session <session-name> <prompt1> [prompt2] [prompt3] ...
+#
+# 示例:
+#   ./qq-session lustre-qa \
+#     "读 REPOMAP.md，列出所有子系统" \
+#     "最复杂的子系统里，夸模块调用最多的文件是哪些" \
+#     "画出核心数据流图的文字版"
+#
+# 每次新 UUID，轮间通过 --resume 延续上下文。
+# session-id 写入 /tmp/qq-session-<name>.id，可后续 --resume 恢复。
+# ============================================================
+
+NAME="${1:-}"
+shift || true
+
+if [ -z "$NAME" ] || [ $# -eq 0 ]; then
+  echo "用法: qq-session <session-name> <prompt1> [prompt2] ..."
+  echo ""
+  echo "示例:"
+  echo "  qq-session code-review \\"
+  echo "    \"读 REPOMAP.md 了解项目结构\" \\"
+  echo "    \"哪些模块有循环依赖\" \\"
+  echo "    \"给出重构建议\""
+  exit 1
+fi
+
+SESSION_ID=$(cat /proc/sys/kernel/random/uuid)
+SESSION_FILE="/tmp/qq-session-${NAME}.id"
+echo "$SESSION_ID" > "$SESSION_FILE"
+
+echo "=== qq-session: $NAME ==="
+echo "session-id: $SESSION_ID"
+echo "轮数: $#"
+echo ""
+
+TURN=1
+IS_FIRST=true
+
+for PROMPT in "$@"; do
+  echo "══════════ Turn $TURN/$# ══════════"
+  echo ""
+
+  if $IS_FIRST; then
+    claude -p "$PROMPT" \
+      --session-id "$SESSION_ID" \
+      --name "$NAME" 2>&1
+    IS_FIRST=false
+  else
+    claude -p "$PROMPT" \
+      --resume "$SESSION_ID" 2>&1
+  fi
+
+  echo ""
+  TURN=$((TURN + 1))
+done
+
+echo "=== 完成 ==="
+echo "恢复此会话: claude --resume $SESSION_ID"
+echo "或:           claude -p \"新问题\" --resume $SESSION_ID"
+echo "session-id 已保存到: $SESSION_FILE"
