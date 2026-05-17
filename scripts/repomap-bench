@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================================
+# repomap-bench — REPOMAP 对照实验
+#
+# 5 个真实需求 × 4 轮对话，有/无 REPOMAP 两组对比
+# 测量每轮耗时，结果输出到 /tmp/repomap-bench/
+# ============================================================
+
+PROJECT="/home/qiuxin/lustre-release"
+OUTDIR="/tmp/repomap-bench-$(date +%s)"
+mkdir -p "$OUTDIR"
+
+# ---- 5 个真实需求 ----
+Q1="我要修改 ldlm_lock_create 的锁超时逻辑，找出所有会受影响的文件，按影响程度排序。"
+Q2="Lustre 的 RPC 请求从客户端到服务端经过哪些模块？画出完整的模块级调用链。"
+Q3="osc_io_submit 函数如果返回 -ENOSPC，上游调用者在哪里处理这个错误？给出完整的错误传播路径。"
+Q4="ptlrpc 模块和 obdclass 模块之间的耦合点有哪些？列出所有跨模块引用的函数和数据结构。"
+Q5="如果要给 Lustre 加 per-file compression 功能，需要改哪些模块？按优先级排序并说明理由。"
+
+FOLLOWUPS=(
+  "继续深入，给出更详细的分析，包含具体函数名和行号。"
+  "检查是否有遗漏的边界情况或间接影响。"
+  "总结成一份可执行的行动计划，分步骤列出。"
+)
+
+run_session() {
+  local label="$1"    # "with" or "without"
+  local sid="$2"
+  local q="$3"
+  local qnum="$4"
+  local log="$OUTDIR/${label}_q${qnum}.log"
+  local time_log="$OUTDIR/${label}_q${qnum}.time"
+
+  echo "  Turn 1..."
+  local t1_start=$(date +%s)
+  claude -p "$q" --session-id "$sid" --name "${label}-q${qnum}" \
+    >> "$log" 2>&1
+  echo $(($(date +%s) - t1_start)) > "$time_log"
+
+  local turn=2
+  for fq in "${FOLLOWUPS[@]}"; do
+    echo "  Turn $turn..."
+    local t_start=$(date +%s)
+    claude -p "$fq" --resume "$sid" >> "$log" 2>&1
+    echo $(($(date +%s) - t_start)) >> "$time_log"
+    turn=$((turn + 1))
+  done
+}
+
+echo "=== REPOMAP 对照实验 ==="
+echo "输出: $OUTDIR"
+echo ""
+
+# ---- 组 A: 有 REPOMAP ----
+echo "--- 组 A: 有 REPOMAP ---"
+cd "$PROJECT"
+for i in 1 2 3 4 5; do
+  qvar="Q$i"
+  echo "Q$i: ${!qvar:0:60}..."
+  sid=$(cat /proc/sys/kernel/random/uuid)
+  run_session "with" "$sid" "${!qvar}" "$i"
+done
+
+# ---- 组 B: 无 REPOMAP ----
+echo ""
+echo "--- 组 B: 无 REPOMAP ---"
+cd "$PROJECT"
+mv REPOMAP.md REPOMAP.md.bench-bak 2>/dev/null || true
+for i in 1 2 3 4 5; do
+  qvar="Q$i"
+  echo "Q$i: ${!qvar:0:60}..."
+  sid=$(cat /proc/sys/kernel/random/uuid)
+  run_session "without" "$sid" "${!qvar}" "$i"
+done
+mv REPOMAP.md.bench-bak REPOMAP.md 2>/dev/null || true
+
+# ---- 汇总 ----
+echo ""
+echo "=== 结果汇总 ==="
+printf "%-5s %-16s %-16s %-12s %-10s\n" "Q" "有REPOMAP" "无REPOMAP" "差异" "变化"
+echo "─────────────────────────────────────────────────────────────────"
+for i in 1 2 3 4 5; do
+  with_sum=$(awk '{s+=$1}END{print s}' "$OUTDIR/with_q${i}.time")
+  without_sum=$(awk '{s+=$1}END{print s}' "$OUTDIR/without_q${i}.time")
+  diff=$((without_sum - with_sum))
+  if [ $with_sum -gt 0 ]; then
+    pct=$(( diff * 100 / with_sum ))
+  else
+    pct=0
+  fi
+  printf "%-5s %5ss (%d轮)  %5ss (%d轮)  %+6ss     %+d%%\n" \
+    "Q$i" "$with_sum" 4 "$without_sum" 4 "$diff" "$pct"
+done
+
+echo ""
+echo "详细日志: $OUTDIR/"
