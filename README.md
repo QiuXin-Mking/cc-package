@@ -22,6 +22,39 @@ cd cc-package
 | `/team-toolkit:cancel-ralph` | 取消活跃的 Ralph 循环 |
 | `/team-toolkit:ralph-help` | Ralph Loop 插件帮助 |
 
+### Ralph Loop 详解
+
+Ralph Loop 实现 [Ralph Wiggum 技术](https://ghuntley.com/ralph/) —— 基于持续 AI 循环的迭代开发方法论。通过 Stop hook 拦截退出，将同一个 prompt 反复喂给 Claude，每次迭代都能看到上一轮的文件变更，逐步逼近目标。
+
+**启动循环：**
+
+```bash
+# 基本用法（无限循环，慎用）
+/team-toolkit:ralph-loop "Refactor the cache layer"
+
+# 设置最大迭代次数（推荐）
+/team-toolkit:ralph-loop "Fix the auth bug" --max-iterations 20
+
+# 设置完成承诺（循环直到输出 <promise>DONE</promise>）
+/team-toolkit:ralph-loop "Build a REST API for todos" --completion-promise "DONE" --max-iterations 50
+```
+
+**选项：**
+
+| 选项 | 说明 |
+|------|------|
+| `--max-iterations <n>` | 最大迭代次数，0 = 无限（默认） |
+| `--completion-promise <text>` | 完成承诺短语，Claude 输出 `<promise>短语</promise>` 时停止 |
+
+**取消循环：**
+
+```bash
+/team-toolkit:cancel-ralph
+```
+
+**适用场景：** 需求清晰的迭代任务（TDD、lint 修复、测试补齐）、有自动验证手段的任务。
+不适合需要人工判断、一次操作即可完成、或需求模糊的任务。
+
 ### Skills（自动触发）
 
 | Skill | 触发场景 |
