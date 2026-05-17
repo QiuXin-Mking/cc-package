@@ -28,7 +28,7 @@ mkdir -p "$PLUGIN_DIR/skills"
 cat > "$PLUGIN_DIR/.claude-plugin/plugin.json" <<JSON
 {
   "name": "${PLUGIN_NAME}",
-  "description": "团队统一工具集：lint-fix Go 自动修复、ralph-gen 任务生成、Excalidraw 图表、前端测试、UI/UX 设计、Unison 配置",
+  "description": "团队统一工具集：lint-fix Go 自动修复、ralph-gen 任务生成、Excalidraw 图表、前端测试、graphify 知识图谱、UI/UX 设计、Unison 配置",
   "version": "${VERSION}",
   "author": { "name": "Team" }
 }
