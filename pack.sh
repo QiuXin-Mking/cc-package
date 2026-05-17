@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================
-# pack.sh — 从 ~/.claude/ 收集配置，打包成 team-toolkit 插件
+# pack.sh — 从 ~/.claude/ 收集配置，打包成 qq-go 插件
 #
 # 用法：./pack.sh
 # 效果：把你在 ~/.claude/commands/ 和 ~/.claude/skills/ 的
@@ -10,7 +10,7 @@ set -euo pipefail
 # ============================================================
 
 PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
-PLUGIN_NAME="team-toolkit"
+PLUGIN_NAME="qq-go"
 VERSION="${1:-1.0.0}"
 
 SOURCE_COMMANDS="$HOME/.claude/commands"

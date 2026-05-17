@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLUGIN_NAME="team-toolkit"
+PLUGIN_NAME="qq-go"
 PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== 安装 ${PLUGIN_NAME} 插件 ==="

@@ -31,14 +31,14 @@ The technique is described as "deterministically bad in an undeterministic world
 
 ## Available Commands
 
-### /team-toolkit:ralph-loop <PROMPT> [OPTIONS]
+### /qq-go:ralph-loop <PROMPT> [OPTIONS]
 
 Start a Ralph loop in your current session.
 
 **Usage:**
 ```
-/team-toolkit:ralph-loop "Refactor the cache layer" --max-iterations 20
-/team-toolkit:ralph-loop "Add tests" --completion-promise "TESTS COMPLETE"
+/qq-go:ralph-loop "Refactor the cache layer" --max-iterations 20
+/qq-go:ralph-loop "Add tests" --completion-promise "TESTS COMPLETE"
 ```
 
 **Options:**
@@ -55,13 +55,13 @@ Start a Ralph loop in your current session.
 
 ---
 
-### /team-toolkit:cancel-ralph
+### /qq-go:cancel-ralph
 
 Cancel an active Ralph loop (removes the loop state file).
 
 **Usage:**
 ```
-/team-toolkit:cancel-ralph
+/qq-go:cancel-ralph
 ```
 
 **How it works:**
@@ -96,7 +96,7 @@ The "loop" doesn't mean Claude talks to itself. It means:
 ### Interactive Bug Fix
 
 ```
-/team-toolkit:ralph-loop "Fix the token refresh logic in auth.ts. Output <promise>FIXED</promise> when all tests pass." --completion-promise "FIXED" --max-iterations 10
+/qq-go:ralph-loop "Fix the token refresh logic in auth.ts. Output <promise>FIXED</promise> when all tests pass." --completion-promise "FIXED" --max-iterations 10
 ```
 
 You'll see Ralph:
