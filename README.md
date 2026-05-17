@@ -18,6 +18,9 @@ cd cc-package
 |------|------|
 | `/team-toolkit:lint-fix` | Go 项目 lint 自动修复，每轮修 3 个问题 |
 | `/team-toolkit:ralph-gen` | 从简短描述生成结构化任务提示 |
+| `/team-toolkit:ralph-loop` | Ralph Wiggum 自循环迭代开发 |
+| `/team-toolkit:cancel-ralph` | 取消活跃的 Ralph 循环 |
+| `/team-toolkit:ralph-help` | Ralph Loop 插件帮助 |
 
 ### Skills（自动触发）
 
