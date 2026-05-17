@@ -1,0 +1,6 @@
+{
+  "name": "team-toolkit",
+  "description": "团队统一工具集：lint-fix Go 自动修复、ralph-gen 任务生成、Excalidraw 图表、前端测试、UI/UX 设计、Unison 配置",
+  "version": "1.0.0",
+  "author": { "name": "Team" }
+}
