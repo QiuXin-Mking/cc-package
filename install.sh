@@ -14,27 +14,36 @@ if [ ! -f "$SETTINGS_FILE" ]; then
 fi
 
 # 用 python 安全地编辑 JSON（macOS 自带 python3）
+# 只在 key 不存在时追加，不覆盖已有内容
 python3 -c "
 import json, sys
 
 with open('$SETTINGS_FILE') as f:
     config = json.load(f)
 
+changed = False
+
 plugins = config.setdefault('enabledPlugins', {})
-plugins['${PLUGIN_NAME}'] = True
+if '${PLUGIN_NAME}' not in plugins:
+    plugins['${PLUGIN_NAME}'] = True
+    changed = True
 
 dir_plugins = config.setdefault('extraKnownMarketplaces', {})
-dir_plugins['${PLUGIN_NAME}_local'] = {
-    'source': {
-        'source': 'directory',
-        'path': '$PLUGIN_DIR'
+if '${PLUGIN_NAME}_local' not in dir_plugins:
+    dir_plugins['${PLUGIN_NAME}_local'] = {
+        'source': {
+            'source': 'directory',
+            'path': '$PLUGIN_DIR'
+        }
     }
-}
+    changed = True
 
-with open('$SETTINGS_FILE', 'w') as f:
-    json.dump(config, f, indent=2, ensure_ascii=False)
-
-print('已注册到', '$SETTINGS_FILE')
+if changed:
+    with open('$SETTINGS_FILE', 'w') as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+    print('已注册到', '$SETTINGS_FILE')
+else:
+    print('已存在，跳过', '$SETTINGS_FILE')
 "
 
 echo ""
