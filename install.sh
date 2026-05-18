@@ -69,14 +69,34 @@ add_alias "gl" "git log -10 --oneline"
 add_alias "gb" "git branch"
 
 echo ""
+
+# 安装 repomap（tree-sitter 代码结构映射）
+echo "=== 安装 repomap ==="
+REPOMAP_DIR="$PLUGIN_DIR/tools/repomap"
+chmod +x "$REPOMAP_DIR/scripts/run.sh"
+
+# 安装 Python 依赖（只在未安装时安装）
+if python3 -c "import tree_sitter_languages" 2>/dev/null; then
+  echo "tree-sitter-languages 已安装，跳过"
+else
+  echo "安装 tree-sitter-languages ..."
+  pip3 install -r "$REPOMAP_DIR/requirements.txt" --quiet 2>/dev/null || \
+    pip3 install tree-sitter==0.21.3 tree-sitter-languages==1.10.2 --quiet || \
+    echo "警告: pip 安装失败，repomap 首次运行时会自动尝试安装"
+fi
+
+echo ""
 echo "=== 安装完成 ==="
 echo ""
 echo "插件命令（命名空间 ${PLUGIN_NAME}）："
-echo "  /${PLUGIN_NAME}:lint-fix       Go lint 自动修复"
-echo "  /${PLUGIN_NAME}:ralph-gen      任务生成"
-echo "  /${PLUGIN_NAME}:ralph-loop     Ralph 自循环迭代"
-echo "  /${PLUGIN_NAME}:cancel-ralph   取消 Ralph 循环"
-echo "  /${PLUGIN_NAME}:ralph-help     Ralph Loop 帮助"
+echo "  /${PLUGIN_NAME}:lint-fix          Go lint 自动修复"
+echo "  /${PLUGIN_NAME}:ralph-gen         任务生成"
+echo "  /${PLUGIN_NAME}:ralph-loop        Ralph 自循环迭代"
+echo "  /${PLUGIN_NAME}:cancel-ralph      取消 Ralph 循环"
+echo "  /${PLUGIN_NAME}:ralph-help        Ralph Loop 帮助"
+echo "  /${PLUGIN_NAME}:repomap           生成代码结构映射"
+echo "  /${PLUGIN_NAME}:repomap-auto-on   启用自动更新 REPOMAP"
+echo "  /${PLUGIN_NAME}:repomap-auto-off  关闭自动更新 REPOMAP"
 echo ""
 echo "可用 skills："
 echo "  excalidraw-diagram-generator   生成 Excalidraw 图表"
