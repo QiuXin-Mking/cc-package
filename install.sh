@@ -47,6 +47,28 @@ else:
 "
 
 echo ""
+
+# 添加 bash 别名到 ~/.bashrc（只在不存在时追加）
+BASHRC_FILE="$HOME/.bashrc"
+
+add_alias() {
+  local name="$1"
+  local value="$2"
+  if grep -q "^alias ${name}=" "$BASHRC_FILE" 2>/dev/null; then
+    echo "别名已存在，跳过: ${name}"
+  else
+    echo "alias ${name}='${value}'" >> "$BASHRC_FILE"
+    echo "已添加别名: ${name}"
+  fi
+}
+
+add_alias "rebase" "git pull origin feature/6.12.0/888-bugfix --rebase && git push -f"
+add_alias "supple-commit" "git add -u && git commit --amend --no-edit && git push -f"
+add_alias "gs" "git status"
+add_alias "gl" "git log -10 --oneline"
+add_alias "gb" "git branch"
+
+echo ""
 echo "=== 安装完成 ==="
 echo ""
 echo "插件命令（命名空间 ${PLUGIN_NAME}）："
